@@ -1,5 +1,6 @@
 life_expectancy_data <- read.csv("Life Expectancy Data.csv", header = TRUE)
 
+# Scatter plots
 plot (life_expectancy_data$Status, life_expectancy_data$Life.expectancy)
 plot (life_expectancy_data$Adult.Mortality, life_expectancy_data$Life.expectancy)
 plot (life_expectancy_data$infant.deaths, life_expectancy_data$Life.expectancy)
@@ -20,5 +21,5 @@ plot (life_expectancy_data$thinness.5.9.years, life_expectancy_data$Life.expecta
 plot (life_expectancy_data$Income.composition.of.resources, life_expectancy_data$Life.expectancy)
 plot (life_expectancy_data$Schooling, life_expectancy_data$Life.expectancy)
 
-lifeexpec <- read.csv("Life Expectancy Data.csv") 
-hist(lifeexpec$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy", border="green",col="blue")
+# Histograms
+hist (life_expectancy_data$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy", border="green",col="blue")
