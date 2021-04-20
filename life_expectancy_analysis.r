@@ -19,3 +19,6 @@ plot (life_expectancy_data$thinness..1.19.years, life_expectancy_data$Life.expec
 plot (life_expectancy_data$thinness.5.9.years, life_expectancy_data$Life.expectancy)
 plot (life_expectancy_data$Income.composition.of.resources, life_expectancy_data$Life.expectancy)
 plot (life_expectancy_data$Schooling, life_expectancy_data$Life.expectancy)
+
+lifeexpec <- read.csv("Life Expectancy Data.csv") 
+hist(lifeexpec$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy", border="green",col="blue")
