@@ -12,7 +12,7 @@ life_expectancy_data <- read.csv("Life Expectancy Data.csv", header = TRUE)
 # Scatter Plots
 ```{r}
 life_expectancy_data$Developed <- as.integer (as.logical(life_expectancy_data$Status == "Developed"))
-plot (life_expectancy_data$Developed, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "Developed")
+plot (life_expectancy_data$Developed, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "0 = Developing, 1 = Developed")
 plot (life_expectancy_data$Alcohol, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "Alcohol")
 plot (life_expectancy_data$percentage.expenditure, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "percentage.expenditure")
 plot (life_expectancy_data$Hepatitis.B, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "Hepatitis.B")
@@ -34,13 +34,24 @@ plot (life_expectancy_data$Schooling, life_expectancy_data$Life.expectancy, ylab
 # Histograms
 ```{r}
 
-hist (life_expectancy_data$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy", border="green",col="blue")
+hist (life_expectancy_data$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy", border="green",col="blue", main = "Life Expectancy")
 
 ```
 
 
+# Fitting the model
+
+In the following step, we will perform hypothesis testing to figure out variables that have a high linear corelation with life expectancy to arrive at a fitted multiple linear regression model
+
+```{r}
 
 
+```
+
+
+# Residual Analysis
+
+In the following step, we will perform residual analysis, to figure out outliers and variables that contribute for and against the accuracy of our model.
 
 
 
