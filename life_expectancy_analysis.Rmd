@@ -55,7 +55,13 @@ In the following step, we will perform residual analysis, to figure out outliers
 
 
 
+# Response to Feedback
 
+How many data points do you have? Is each country a data point or a combination of country and year a data point? (-1)
+
+Describe members' responsibility on the planned data analysis, not about the proposal. (-1)
+
+Exploratory data analysis described in GOAL is better placed in PLAN.
 
 
 
