@@ -1,0 +1,52 @@
+---
+title: "Life_expectancy_analysis"
+author: "VMC"
+date: "4/27/2021"
+output: html_document
+---
+
+```{r}
+life_expectancy_data <- read.csv("Life Expectancy Data.csv", header = TRUE)
+```
+
+# Scatter Plots
+```{r}
+plot (life_expectancy_data$Status, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Adult.Mortality, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$infant.deaths, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Alcohol, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$percentage.expenditure, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Hepatitis.B, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Measles, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$BMI, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$under.five.deaths, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Polio, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Total.expenditure, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Diphtheria, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$HIV.AIDS, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$GDP, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Population, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$thinness..1.19.years, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$thinness.5.9.years, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Income.composition.of.resources, life_expectancy_data$Life.expectancy)
+plot (life_expectancy_data$Schooling, life_expectancy_data$Life.expectancy)
+```
+
+# Histograms
+```{r}
+
+hist (life_expectancy_data$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy", border="green",col="blue")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

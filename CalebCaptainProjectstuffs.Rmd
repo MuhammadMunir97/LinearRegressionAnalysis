@@ -1,0 +1,76 @@
+---
+title: "Project Work"
+author: "Caleb Captain"
+date: "4/20/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(ggplot2)
+library(plotly)
+library(tidyverse)
+library(stringr)
+library(mltools)
+library(data.table)
+data <- read.csv("Life Expectancy Data.csv")
+colnames(data)
+
+
+colnames(data)[sapply(data, anyNA)]
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+#summary(data)
+#summary(data$Country)
+#summary(data$Year)
+
+table(is.na.data.frame(data))
+#There are 2563 null values in the data
+
+table(is.na.data.frame(data$Life.expectancy))
+table(is.na.data.frame(data$Hepatitis.B))
+table(is.na.data.frame(data$Polio))
+table(is.na.data.frame(data$Total.expenditure))
+table(is.na.data.frame(data$Population))
+table(is.na.data.frame(data$Income.composition.of.resources))
+table(is.na.data.frame(data$Adult.Mortality))
+table(is.na.data.frame(data$BMI))
+table(is.na.data.frame(data$Diphtheria))
+table(is.na.data.frame(data$thinness..1.19.years))
+table(is.na.data.frame(data$Schooling))
+table(is.na.data.frame(data$Alcohol))
+table(is.na.data.frame(data$Polio))
+table(is.na.data.frame(data$GDP))
+table(is.na.data.frame(data$thinness.5.9.years))
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+colnames(data)[sapply(data, anyNA)]
+
+ggplotly(ggplot(data, aes(x = data$Country == 'Afghanistan', y = Life.expectancy)) + geom_boxplot())
+
+
+
+summary(unique(data$Country))
+
+
+
+```
