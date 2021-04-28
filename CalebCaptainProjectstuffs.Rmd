@@ -15,18 +15,32 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
+```{r}
+install.packages('corrplot')
+install.packages('Hmisc')
+install.packages('dplyr')
+install.packages('corrplot')
+
 library(ggplot2)
 library(plotly)
 library(tidyverse)
 library(stringr)
 library(mltools)
 library(data.table)
+library(car)
+library(dplyr)
+library(Hmisc)
+
 data <- read.csv("Life Expectancy Data.csv")
+
 colnames(data)
-
-
+unique(data$Status)
+data$Status <- factor(x=data$Status, levels=unique(data$Status), labels=c(0,1))
+data <- within(data, rm(Country))
+data
+data <- one_hot(as.data.table(data), cols = "Status")
 colnames(data)[sapply(data, anyNA)]
+
 ```
 
 ## Including Plots
@@ -38,39 +52,134 @@ You can also embed plots, for example:
 #summary(data$Country)
 #summary(data$Year)
 
-table(is.na.data.frame(data))
+#table(is.na.data.frame(data))
 #There are 2563 null values in the data
 
-table(is.na.data.frame(data$Life.expectancy))
+#table(is.na.data.frame(data$Life.expectancy))
 table(is.na.data.frame(data$Hepatitis.B))
-table(is.na.data.frame(data$Polio))
+#table(is.na.data.frame(data$Polio))
 table(is.na.data.frame(data$Total.expenditure))
 table(is.na.data.frame(data$Population))
 table(is.na.data.frame(data$Income.composition.of.resources))
 table(is.na.data.frame(data$Adult.Mortality))
-table(is.na.data.frame(data$BMI))
-table(is.na.data.frame(data$Diphtheria))
-table(is.na.data.frame(data$thinness..1.19.years))
+#table(is.na.data.frame(data$BMI))
+#table(is.na.data.frame(data$Diphtheria))
+#table(is.na.data.frame(data$thinness..1.19.years))
 table(is.na.data.frame(data$Schooling))
 table(is.na.data.frame(data$Alcohol))
-table(is.na.data.frame(data$Polio))
 table(is.na.data.frame(data$GDP))
-table(is.na.data.frame(data$thinness.5.9.years))
-
+#table(is.na.data.frame(data$thinness.5.9.years))
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+colnames(data)[sapply(data, anyNA)]
+names <- colnames(data)[sapply(data, anyNA)]
+cnames <- unique(data$Country)
+year <- unique(data$Year)
+year
+```
 
 
 ```{r}
 colnames(data)[sapply(data, anyNA)]
-
-ggplotly(ggplot(data, aes(x = data$Country == 'Afghanistan', y = Life.expectancy)) + geom_boxplot())
-
-
-
 summary(unique(data$Country))
 
+#"Life.expectancy"                 "Adult.Mortality"                 "Alcohol"                        
+# [4] "Hepatitis.B"                     "BMI"                             "Polio"                          
+# [7] "Total.expenditure"               "Diphtheria"                      "GDP"                            
+#[10] "Population"                      "thinness..1.19.years"            "thinness.5.9.years"             
+#[13] "Income.composition.of.resources" "Schooling"     
 
+#ggplotly(ggplot(df, aes(x=Stage, y=types, fill = Stage)) + geom_boxplot() + facet_grid(scales = "free")) 
+
+summary(data$Life.expectancy) #Can Fill with Mean
+summary(data$Hepatitis.B) #
+summary(data$Total.expenditure)
+summary(data$Population)
+summary(data$Income.composition.of.resources)
+summary(data$Adult.Mortality)
+summary(data$BMI)
+summary(data$Diphtheria)
+summary(data$thinness..1.19.years)
+summary(data$Schooling)
+summary(data$Alcohol)
+summary(data$Polio)
+summary(data$GDP)
+summary(data$thinness.5.9.years)
+
+#ggplotly(ggplot(data, aes(x = Country, y = Life.expectancy)) + geom_boxplot())
+
+#ggplotly(ggplot(data, aes(x = Year, y = Hepatitis.B)) + geom_boxplot())
+
+boxplot(data$Hepatitis.B)
+
+ggplotly(ggplot(data, aes(y=Life.expectancy)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Hepatitis.B)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Total.expenditure)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Population)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Income.composition.of.resources)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Adult.Mortality)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=BMI)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Diphtheria)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=thinness..1.19.years)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Schooling)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Alcohol)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Polio)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=GDP)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=thinness.5.9.years)) + geom_boxplot())
 
 ```
+```{r}
+ind <- which(is.na(data$Life.expectancy))
+
+#table(is.na.data.frame(data$Life.expectancy))
+##table(is.na.data.frame(data$Hepatitis.B))
+#table(is.na.data.frame(data$Polio))
+##table(is.na.data.frame(data$Total.expenditure))
+##table(is.na.data.frame(data$Population))
+##table(is.na.data.frame(data$Income.composition.of.resources))
+##table(is.na.data.frame(data$Adult.Mortality))
+#table(is.na.data.frame(data$BMI))
+#table(is.na.data.frame(data$Diphtheria))
+#table(is.na.data.frame(data$thinness..1.19.years))
+##table(is.na.data.frame(data$Schooling))
+##table(is.na.data.frame(data$Alcohol))
+##table(is.na.data.frame(data$GDP))
+#table(is.na.data.frame(data$thinness.5.9.years))
+
+data$Life.expectancy[is.na(data$Life.expectancy)] <- mean(data$Life.expectancy, na.rm = T)
+data$Polio[is.na(data$Polio)] <- mean(data$Polio, na.rm = T)
+data$BMI[is.na(data$BMI)] <- mean(data$BMI, na.rm = T)
+data$Diphtheria[is.na(data$Diphtheria)] <- mean(data$Diphtheria, na.rm = T)
+data$thinness..1.19.years[is.na(data$thinness..1.19.years)] <- mean(data$thinness..1.19.years, na.rm = T)
+data$thinness.5.9.years[is.na(data$thinness.5.9.years)] <- mean(data$thinness.5.9.years, na.rm = T)
+
+data[ind]
+
+data <- within(data, rm(Hepatitis.B, Total.expenditure, Population, 
+                        Income.composition.of.resources, Adult.Mortality, 
+                        Schooling, Alcohol, GDP))
+
+data.cor <- cor(data)
+
+corrplot(data.cor, tl.cex = .75)
+
+#data
+#is.na(data$Population)
+#inds <- which(is.na(data$Population))
+
+#length(which(data$Country == "United States of America"))
+
+```
+
+Features to use for fitting: 
+Year, Status_0, Status_1, percentage.expenditures, BMI, polio, Diphtheria, HIV.AIDS
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
