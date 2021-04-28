@@ -1,18 +1,22 @@
 ---
-title: "Life_expectancy_analysis"
+title: "Life Expectancy Analysis"
 author: "VMC"
 date: "4/27/2021"
 output: html_document
 ---
 
 ```{r}
+library(rmarkdown)
+library (ggplot2)
 life_expectancy_data <- read.csv("Life Expectancy Data.csv", header = TRUE)
 ```
 
 # Scatter Plots
 ```{r}
+
+ggplot(life_expectancy_data, aes(Year, Life.expectancy, fill = Life.expectancy)) + geom_point(shape=21)
 life_expectancy_data$Developed <- as.integer (as.logical(life_expectancy_data$Status == "Developed"))
-plot (life_expectancy_data$Developed, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "0 = Developing, 1 = Developed")
+ggplot (life_expectancy_data, Developed, Life.expectancy, ylab = "Life Expectancy", xlab = "0 = Developing, 1 = Developed")
 plot (life_expectancy_data$Alcohol, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "Alcohol")
 plot (life_expectancy_data$percentage.expenditure, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "percentage.expenditure")
 plot (life_expectancy_data$Hepatitis.B, life_expectancy_data$Life.expectancy, ylab = "Life Expectancy", xlab = "Hepatitis.B")
@@ -45,7 +49,7 @@ In the following step, we will perform hypothesis testing to figure out variable
 
 ```{r}
 
-
+render("life_expectancy_analysis.Rmd", "pdf_document")
 ```
 
 
@@ -57,6 +61,6 @@ In the following step, we will perform residual analysis, to figure out outliers
 
 
 
-
+# this is updated text
 
 
