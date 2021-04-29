@@ -30,7 +30,11 @@ library(data.table)
 library(car)
 library(dplyr)
 library(Hmisc)
+library(corrplot)
+```
 
+
+```{r}
 data <- read.csv("Life Expectancy Data.csv")
 
 colnames(data)
@@ -152,11 +156,12 @@ data$BMI[is.na(data$BMI)] <- mean(data$BMI, na.rm = T)
 data$Diphtheria[is.na(data$Diphtheria)] <- mean(data$Diphtheria, na.rm = T)
 data$thinness..1.19.years[is.na(data$thinness..1.19.years)] <- mean(data$thinness..1.19.years, na.rm = T)
 data$thinness.5.9.years[is.na(data$thinness.5.9.years)] <- mean(data$thinness.5.9.years, na.rm = T)
+data$Adult.Mortality[is.na(data$Adult.Mortality)] <- mean(data$Adult.Mortality, na.rm = T)
 
 data[ind]
 
 data <- within(data, rm(Hepatitis.B, Total.expenditure, Population, 
-                        Income.composition.of.resources, Adult.Mortality, 
+                        Income.composition.of.resources, Adult.Mortality,
                         Schooling, Alcohol, GDP))
 
 data.cor <- cor(data)
@@ -172,14 +177,33 @@ corrplot(data.cor, tl.cex = .75)
 ```
 
 Features to use for fitting: 
-Year, Status_0, Status_1, percentage.expenditures, BMI, polio, Diphtheria, HIV.AIDS
+Year, Status_0, Status_1, percentage.expenditure, BMI, Polio, Diphtheria, HIV.AIDS
 
 ```{r}
+#length(data$Status_0)
+#length(data$Status_1)
+#length(data$Life.expectancy)
+#length(data$BMI)
+#length(data$Polio)
+#length(data$percentage.expenditure)
+#length(data$Diphtheria)
+#length(data$HIV.AIDS)
+#length(data$Year)
 
+data <- as.data.frame(data)
+
+model1 <- lm(Life.expectancy ~ Year+Status_0+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
+
+model2 <- lm(Life.expectancy ~ Year+Status_1+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
 ```
 
-```{r}
+Looks like we can drop either Status_1 or Status_0 because they are EXACTLY inversely correlated. 
 
+
+```{r}
+model1
+
+model2
 ```
 
 
