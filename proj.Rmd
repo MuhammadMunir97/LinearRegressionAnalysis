@@ -1,0 +1,43 @@
+---
+title: "Project"
+author: "Vismaya Joseph"
+date: "4/20/2021"
+output: html_document
+---
+
+```{r}
+lifeexpec <- read.csv("C:\\Users\\pajos\\rstudio-workspace\\Life Expectancy Data.csv") 
+
+
+colnames(lifeexpec)
+unique(lifeexpec$Status)
+lifeexpec$Status <- factor(x=lifeexpec$Status, levels=unique(lifeexpec$Status), labels=c(0,1))
+lifeexpec <- within(lifeexpec, rm(Country))
+lifeexpec
+
+lifeexpec$Life.expectancy[is.na(lifeexpec$Life.expectancy)] <- mean(lifeexpec$Life.expectancy, na.rm = T)
+lifeexpec$Polio[is.na(lifeexpec$Polio)] <- mean(lifeexpec$Polio, na.rm = T)
+lifeexpec$BMI[is.na(lifeexpec$BMI)] <- mean(lifeexpec$BMI, na.rm = T)
+lifeexpec$Diphtheria[is.na(lifeexpec$Diphtheria)] <- mean(lifeexpec$Diphtheria, na.rm = T)
+lifeexpec$Year[is.na(lifeexpec$Year)] <- mean(lifeexpec$Year, na.rm = T)
+lifeexpec$percentage.expenditure[is.na(lifeexpec$percentage.expenditure)] <- mean(lifeexpec$percentage.expenditure, na.rm = T)
+lifeexpec$HIV.AIDS[is.na(lifeexpec$HIV.AIDS)] <- mean(lifeexpec$HIV.AIDS, na.rm = T)
+lifeexpec$Status[is.na(lifeexpec$Status)] <- mean(lifeexpec$Status, na.rm = T)
+
+
+
+fit <- lm(lifeexpec$Life.expectancy~lifeexpec$Status+lifeexpec$percentage.expenditure+lifeexpec$BMI+lifeexpec$Polio+lifeexpec$Diphtheria+lifeexpec$HIV.AIDS)
+summary(fit)
+
+library(car)
+library(MASS)
+par(mfrow=c(1,2))
+qqPlot(fit)
+
+library(car)
+par(mfrow=c(1,1))
+residualPlot(fit, type="rstudent", quadratic=F, col = "dodgerblue",
+             pch=16, cex=1.5, cex.axis=1.5, cex.lab=1.5)
+
+```
+
