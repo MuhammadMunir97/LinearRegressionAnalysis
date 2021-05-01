@@ -6,27 +6,27 @@ output: html_document
 ---
 
 ```{r}
-lifeexpec <- read.csv("C:\\Users\\pajos\\rstudio-workspace\\Life Expectancy Data.csv") 
+life_expectancy_data <- read.csv("C:\\Users\\pajos\\rstudio-workspace\\Life Expectancy Data.csv") 
 
 
-colnames(lifeexpec)
-unique(lifeexpec$Status)
-lifeexpec$Status <- factor(x=lifeexpec$Status, levels=unique(lifeexpec$Status), labels=c(0,1))
-lifeexpec <- within(lifeexpec, rm(Country))
-lifeexpec
+colnames(life_expectancy_data)
+unique(life_expectancy_data$Status)
+life_expectancy_data$Status <- factor(x=life_expectancy_data$Status, levels=unique(life_expectancy_data$Status), labels=c(0,1))
+life_expectancy_data <- within(life_expectancy_data, rm(Country))
+life_expectancy_data
 
-lifeexpec$Life.expectancy[is.na(lifeexpec$Life.expectancy)] <- mean(lifeexpec$Life.expectancy, na.rm = T)
-lifeexpec$Polio[is.na(lifeexpec$Polio)] <- mean(lifeexpec$Polio, na.rm = T)
-lifeexpec$BMI[is.na(lifeexpec$BMI)] <- mean(lifeexpec$BMI, na.rm = T)
-lifeexpec$Diphtheria[is.na(lifeexpec$Diphtheria)] <- mean(lifeexpec$Diphtheria, na.rm = T)
-lifeexpec$Year[is.na(lifeexpec$Year)] <- mean(lifeexpec$Year, na.rm = T)
-lifeexpec$percentage.expenditure[is.na(lifeexpec$percentage.expenditure)] <- mean(lifeexpec$percentage.expenditure, na.rm = T)
-lifeexpec$HIV.AIDS[is.na(lifeexpec$HIV.AIDS)] <- mean(lifeexpec$HIV.AIDS, na.rm = T)
-lifeexpec$Status[is.na(lifeexpec$Status)] <- mean(lifeexpec$Status, na.rm = T)
+life_expectancy_data$Life.expectancy[is.na(life_expectancy_data$Life.expectancy)] <- mean(life_expectancy_data$Life.expectancy, na.rm = T)
+life_expectancy_data$Polio[is.na(life_expectancy_data$Polio)] <- mean(life_expectancy_data$Polio, na.rm = T)
+life_expectancy_data$BMI[is.na(life_expectancy_data$BMI)] <- mean(life_expectancy_data$BMI, na.rm = T)
+life_expectancy_data$Diphtheria[is.na(life_expectancy_data$Diphtheria)] <- mean(life_expectancy_data$Diphtheria, na.rm = T)
+life_expectancy_data$Year[is.na(life_expectancy_data$Year)] <- mean(life_expectancy_data$Year, na.rm = T)
+life_expectancy_data$percentage.expenditure[is.na(life_expectancy_data$percentage.expenditure)] <- mean(life_expectancy_data$percentage.expenditure, na.rm = T)
+life_expectancy_data$HIV.AIDS[is.na(life_expectancy_data$HIV.AIDS)] <- mean(life_expectancy_data$HIV.AIDS, na.rm = T)
+life_expectancy_data$Status[is.na(life_expectancy_data$Status)] <- mean(life_expectancy_data$Status, na.rm = T)
 
 
 
-fit <- lm(lifeexpec$Life.expectancy~lifeexpec$Status+lifeexpec$percentage.expenditure+lifeexpec$BMI+lifeexpec$Polio+lifeexpec$Diphtheria+lifeexpec$HIV.AIDS)
+fit <- lm(life_expectancy_data$Life.expectancy~life_expectancy_data$Status+life_expectancy_data$percentage.expenditure+life_expectancy_data$BMI+life_expectancy_data$Polio+life_expectancy_data$Diphtheria+life_expectancy_data$HIV.AIDS)
 summary(fit)
 
 library(car)

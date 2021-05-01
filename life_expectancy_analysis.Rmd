@@ -92,6 +92,39 @@ render("life_expectancy_analysis.Rmd", "pdf_document")
 
 In the following step, we will perform residual analysis, to figure out outliers and variables that contribute for and against the accuracy of our model.
 
+```{r}
+
+
+colnames(life_expectancy_data)
+unique(life_expectancy_data$Status)
+life_expectancy_data$Status <- factor(x=life_expectancy_data$Status, levels=unique(life_expectancy_data$Status), labels=c(0,1))
+life_expectancy_data <- within(life_expectancy_data, rm(Country))
+life_expectancy_data
+
+life_expectancy_data$Life.expectancy[is.na(life_expectancy_data$Life.expectancy)] <- mean(life_expectancy_data$Life.expectancy, na.rm = T)
+life_expectancy_data$Polio[is.na(life_expectancy_data$Polio)] <- mean(life_expectancy_data$Polio, na.rm = T)
+life_expectancy_data$BMI[is.na(life_expectancy_data$BMI)] <- mean(life_expectancy_data$BMI, na.rm = T)
+life_expectancy_data$Diphtheria[is.na(life_expectancy_data$Diphtheria)] <- mean(life_expectancy_data$Diphtheria, na.rm = T)
+life_expectancy_data$Year[is.na(life_expectancy_data$Year)] <- mean(life_expectancy_data$Year, na.rm = T)
+life_expectancy_data$percentage.expenditure[is.na(life_expectancy_data$percentage.expenditure)] <- mean(life_expectancy_data$percentage.expenditure, na.rm = T)
+life_expectancy_data$HIV.AIDS[is.na(life_expectancy_data$HIV.AIDS)] <- mean(life_expectancy_data$HIV.AIDS, na.rm = T)
+life_expectancy_data$Status[is.na(life_expectancy_data$Status)] <- mean(life_expectancy_data$Status, na.rm = T)
+
+
+
+fit <- lm(life_expectancy_data$Life.expectancy~life_expectancy_data$Status+life_expectancy_data$percentage.expenditure+life_expectancy_data$BMI+life_expectancy_data$Polio+life_expectancy_data$Diphtheria+life_expectancy_data$HIV.AIDS)
+summary(fit)
+
+library(car)
+library(MASS)
+par(mfrow=c(1,2))
+qqPlot(fit)
+
+par(mfrow=c(1,1))
+residualPlot(fit, type="rstudent", quadratic=F, col = "dodgerblue",
+             pch=16, cex=1.5, cex.axis=1.5, cex.lab=1.5)
+
+```
 
 
 # Response to Feedback
