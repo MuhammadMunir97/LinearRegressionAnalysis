@@ -126,6 +126,50 @@ residualPlot(fit, type="rstudent", quadratic=F, col = "dodgerblue",
 
 ```
 
+```{r}
+# head (life_expectancy_data)
+# plot(qqnorm (life_expectancy_data$percentage.expenditure)); qqline (life_expectancy_data$percentage.expenditure)
+# life_expectancy_data$percentage.expenditure
+# log.per <- log (life_expectancy_data$percentage.expenditure)
+# log.per[log.per = -Inf] <- mean (log.per, na.rm = T)
+# qqplot (life_expectancy_data$Life.expectancy, log.per)
+# plot(qqnorm (log.per)); qqline (log.per)
+```
+
+
+# Transformations
+
+``` {r}
+
+life_expectancy_box_cox <- boxcox(fit, lambda = seq (-2, 2, 1/10))
+life_expectancy_box_cox$x[which.max (life_expectancy_box_cox$y)]
+
+transformed_life_expectancy <- life_expectancy_data
+transformed_life_expectancy$Life.expectancy <- transformed_life_expectancy$Life.expectancy^2
+
+transformed_fit <- lm(transformed_life_expectancy$Life.expectancy~transformed_life_expectancy$Status+transformed_life_expectancy$percentage.expenditure+transformed_life_expectancy$BMI+transformed_life_expectancy$Polio+transformed_life_expectancy$Diphtheria+transformed_life_expectancy$HIV.AIDS)
+
+plot (transformed_fit)
+par(mfrow = c(1,2))
+qqplot (transformed_fit)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Response to Feedback
 
@@ -135,6 +179,5 @@ Describe members' responsibility on the planned data analysis, not about the pro
 
 Exploratory data analysis described in GOAL is better placed in PLAN.
 
-# this is updated text
 
 
