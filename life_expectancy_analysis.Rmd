@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r}
+knitr::opts_chunk$set(echo = TRUE)
 library(rmarkdown)
 library (ggplot2)
 life_expectancy_data <- read.csv("Life Expectancy Data.csv", header = TRUE)
@@ -141,7 +142,7 @@ residualPlot(fit, type="rstudent", quadratic=F, col = "dodgerblue",
 
 ``` {r}
 
-life_expectancy_box_cox <- boxcox(life_expectancy_data$Life.expectancy~life_expectancy_data$Status+life_expectancy_data$percentage.expenditure+life_expectancy_data$BMI+life_expectancy_data$Polio+life_expectancy_data$Diphtheria+life_expectancy_data$HIV.AIDS, lambda = seq (-2, 2, 1/10))
+life_expectancy_box_cox <- boxCox(life_expectancy_data$Life.expectancy~life_expectancy_data$Status+life_expectancy_data$percentage.expenditure+life_expectancy_data$BMI+life_expectancy_data$Polio+life_expectancy_data$Diphtheria+life_expectancy_data$HIV.AIDS, lambda = seq (-2, 2, 1/10))
 life_expectancy_box_cox
 life_expectancy_box_cox$x[which.max (life_expectancy_box_cox$y)]
 
@@ -149,7 +150,7 @@ transformed_fit <- lm(life_expectancy_data$Life.expectancy^2~life_expectancy_dat
 
 plot (transformed_fit)
 par(mfrow = c(1,2))
-qqplot (transformed_fit)
+qqPlot (transformed_fit)
 ```
 
 ## Influence Analysis
