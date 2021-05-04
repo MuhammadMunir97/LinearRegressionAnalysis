@@ -146,9 +146,10 @@ life_expectancy_box_cox <- boxCox(life_expectancy_data$Life.expectancy~life_expe
 life_expectancy_box_cox
 life_expectancy_box_cox$x[which.max (life_expectancy_box_cox$y)]
 
-transformed_fit <- lm(life_expectancy_data$Life.expectancy^2~life_expectancy_data$Status+life_expectancy_data$percentage.expenditure+life_expectancy_data$BMI+life_expectancy_data$Polio+life_expectancy_data$Diphtheria+life_expectancy_data$HIV.AIDS)
+transformed_fit <- lm((life_expectancy_data$Life.expectancy^2 - 1)/2~life_expectancy_data$Status+life_expectancy_data$percentage.expenditure+life_expectancy_data$BMI+life_expectancy_data$Polio+life_expectancy_data$Diphtheria+life_expectancy_data$HIV.AIDS)
 
 plot (transformed_fit)
+summary (transformed_fit)
 par(mfrow = c(1,2))
 qqPlot (transformed_fit)
 ```
@@ -162,8 +163,15 @@ influenceIndexPlot (fit)
 
 summary (influence.measures (transformed_fit))
 dfbetaPlots (transformed_fit)
+
 influenceIndexPlot (transformed_fit)
 
+```
+
+Multicolinearity
+
+```{r}
+vif (transformed_fit)
 ```
 
 
