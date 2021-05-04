@@ -16,10 +16,10 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
-install.packages('corrplot')
-install.packages('Hmisc')
-install.packages('dplyr')
-install.packages('corrplot')
+#install.packages('corrplot')
+#install.packages('Hmisc')
+#install.packages('dplyr')
+#install.packages('corrplot')
 
 library(ggplot2)
 library(plotly)
@@ -37,6 +37,8 @@ library(corrplot)
 ```{r}
 data <- read.csv("Life Expectancy Data.csv")
 
+describe(data)
+
 colnames(data)
 unique(data$Status)
 data$Status <- factor(x=data$Status, levels=unique(data$Status), labels=c(0,1))
@@ -44,7 +46,6 @@ data <- within(data, rm(Country))
 data
 data <- one_hot(as.data.table(data), cols = "Status")
 colnames(data)[sapply(data, anyNA)]
-
 ```
 
 ## Including Plots
@@ -74,6 +75,8 @@ table(is.na.data.frame(data$Alcohol))
 table(is.na.data.frame(data$GDP))
 #table(is.na.data.frame(data$thinness.5.9.years))
 ```
+
+
 ```{r}
 colnames(data)[sapply(data, anyNA)]
 names <- colnames(data)[sapply(data, anyNA)]
@@ -85,7 +88,6 @@ year
 
 ```{r}
 colnames(data)[sapply(data, anyNA)]
-summary(unique(data$Country))
 
 #"Life.expectancy"                 "Adult.Mortality"                 "Alcohol"                        
 # [4] "Hepatitis.B"                     "BMI"                             "Polio"                          
@@ -132,6 +134,8 @@ ggplotly(ggplot(data, aes(y=GDP)) + geom_boxplot())
 ggplotly(ggplot(data, aes(y=thinness.5.9.years)) + geom_boxplot())
 
 ```
+
+
 ```{r}
 ind <- which(is.na(data$Life.expectancy))
 
@@ -149,6 +153,7 @@ ind <- which(is.na(data$Life.expectancy))
 ##table(is.na.data.frame(data$Alcohol))
 ##table(is.na.data.frame(data$GDP))
 #table(is.na.data.frame(data$thinness.5.9.years))
+
 
 data$Life.expectancy[is.na(data$Life.expectancy)] <- mean(data$Life.expectancy, na.rm = T)
 data$Polio[is.na(data$Polio)] <- mean(data$Polio, na.rm = T)
@@ -177,7 +182,7 @@ corrplot(data.cor, tl.cex = .75)
 ```
 
 Features to use for fitting: 
-Year, Status_0, Status_1, percentage.expenditure, BMI, Polio, Diphtheria, HIV.AIDS
+Status_0, Status_1, percentage.expenditure, BMI, Polio, Diphtheria, HIV.AIDS
 
 ```{r}
 #length(data$Status_0)
@@ -192,18 +197,183 @@ Year, Status_0, Status_1, percentage.expenditure, BMI, Polio, Diphtheria, HIV.AI
 
 data <- as.data.frame(data)
 
-model1 <- lm(Life.expectancy ~ Year+Status_0+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
+model1 <- lm(Life.expectancy ~ Status_0+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
 
-model2 <- lm(Life.expectancy ~ Year+Status_1+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
+model2 <- lm(Life.expectancy ~ Status_1+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
 ```
 
 Looks like we can drop either Status_1 or Status_0 because they are EXACTLY inversely correlated. 
 
 
 ```{r}
-model1
 
-model2
+summary(model1)
+hist(studres(model1), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+summary(model2)
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
 ```
 
+
+Below is the way I'd rather do it. I looked into it, and it turns out that we CAN drop the na's and still have a whopping 1
+```{r}
+data <- read.csv("Life Expectancy Data.csv")
+
+#names(data)
+data1 <- data %>% filter(
+  !is.na(data$Country),
+  !is.na(data$Status),
+  !is.na(data$Adult.Mortality),
+  !is.na(data$Life.expectancy),
+  !is.na(data$infant.deaths),
+  !is.na(data$Alcohol),
+  !is.na(data$percentage.expenditure),
+  !is.na(data$Hepatitis.B),
+  !is.na(data$Measles),
+  !is.na(data$BMI),
+  !is.na(data$under.five.deaths),
+  !is.na(data$Polio),
+  !is.na(data$Total.expenditure),
+  !is.na(data$Diphtheria),
+  !is.na(data$HIV.AIDS),
+  !is.na(data$GDP),
+  !is.na(data$Population),
+  !is.na(data$thinness..1.19.years),
+  !is.na(data$thinness.5.9.years),
+  !is.na(data$Income.composition.of.resources),
+  !is.na(data$Schooling)
+)
+
+data1 <- within(data1, rm(Year, Country, Adult.Mortality, infant.deaths))
+
+names(data1)
+
+data1$Status <- factor(x=data1$Status, levels=unique(data1$Status), labels=c(0,1))
+
+model1 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+GDP+Population+thinness..1.19.years+ 
+               thinness.5.9.years+Income.composition.of.resources+Schooling, data1)
+
+summary(model1)
+
+hist(studres(model1), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+vif(model1)
+
+bc1 <- boxCox(data1$Life.expectancy ~ data1$Status+data1$Alcohol+
+         data1$percentage.expenditure+data1$Hepatitis.B+data1$Measles+
+         data1$BMI+data1$under.five.deaths+data1$Polio+data1$Total.expenditure+
+         data1$Diphtheria+data1$HIV.AIDS+data1$GDP+data1$Population+
+         data1$thinness..1.19.years+data1$thinness.5.9.years+
+         data1$Income.composition.of.resources+data1$Schooling)
+
+model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
+
+summary(model2)
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+bc2 <- boxCox(data1$Life.expectancy~data1$Status+data1$Alcohol+
+         data1$percentage.expenditure+data1$Hepatitis.B+data1$Measles+
+         data1$BMI+data1$under.five.deaths+data1$Polio+data1$Total.expenditure+
+         data1$Diphtheria+data1$HIV.AIDS+
+         data1$Income.composition.of.resources+data1$Schooling)
+```
+#Correlation Diagram
+
+#Residual Analysis
+
+
+```{r}
+lambda1 <- bc1$x[which.max(bc1$y)]
+
+lambda2 <- bc2$x[which.max(bc2$y)]
+
+summary(residualPlot(model1, type="rstudent", quadratic=F, 
+             col = "dodgerblue", pch=16, cex=1.5, 
+             cex.axis=1.5, cex.lab=1.5, ylim=c(-3,3)))
+
+residualPlot(model1, variable='fitted', type='rstudent')
+
+qqPlot(model1)
+```
+
+
+
+```{r}
+influenceIndexPlot(model1, vars=c('Cook', 'hat'))
+dfbetaPlots(model1, intercept=T)
+```
+
+Problem indexes are 903, 1122, 665, 672.
+Lets Take them out and try it again.
+
+```{r}
+data1 <- data1[-c(903,1122,665,672),]
+data1
+
+model1 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+GDP+Population+thinness..1.19.years+ 
+               thinness.5.9.years+Income.composition.of.resources+Schooling, data1)
+
+summary(model1)
+
+hist(studres(model1), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+```
+
+
+```{r}
+summary(residualPlot(model2, type="rstudent", quadratic=F, 
+             col = "dodgerblue", pch=16, cex=1.5, 
+             cex.axis=1.5, cex.lab=1.5, ylim=c(-3,3)))
+
+qqPlot(model2)
+residualPlot(model1, variable='fitted', type='rstudent')
+```
+
+
+```{r}
+influenceIndexPlot(model2, vars=c('Cook', 'hat'))
+dfbetaPlots(model2, intercept=T)
+
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+```
+
+problem indexes are 903, 355, 1122
+
+```{r}
+data1 <- data1[-c(355, 903),]
+data1
+
+model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
+
+summary(model2)
+
+```
+
+
+```{r}
+influenceIndexPlot(model2, vars=c('Cook', 'hat'))
+dfbetaPlots(model2, intercept=T)
+
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+vif(model2)
+```
+SO Far: this is where I am at. I like this version better. Sure: we cut out a LOT of NA values, but we can still get good data and even BETTER models than the last.
+
+Note: we don't need transformations. Never needed transformations. BOTH models were regularly distributed.
 
