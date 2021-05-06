@@ -20,31 +20,39 @@ When you click the **Knit** button a document will be generated that includes bo
 #install.packages('Hmisc')
 #install.packages('dplyr')
 #install.packages('corrplot')
+#install.packages("virirdis")
 
-library(ggplot2)
-library(plotly)
-library(tidyverse)
-library(stringr)
-library(mltools)
-library(data.table)
-library(car)
-library(dplyr)
-library(Hmisc)
-library(corrplot)
+shhh <- suppressPackageStartupMessages
+shhh(library(ggplot2))
+shhh(library(plotly))
+shhh(library(tidyverse))
+shhh(library(stringr))
+shhh(library(mltools))
+shhh(library(data.table))
+shhh(library(car))
+shhh(library(dplyr))
+shhh(library(Hmisc))
+shhh(library(corrplot))
+shhh(library(MASS))
+shhh(library(faraway))
+shhh(library(viridis))
+shhh(library(stargazer))
 ```
 
 
 ```{r}
 data <- read.csv("Life Expectancy Data.csv")
 
-describe(data)
+#describe(data)
 
-colnames(data)
+#colnames(data)
 unique(data$Status)
 data$Status <- factor(x=data$Status, levels=unique(data$Status), labels=c(0,1))
+typeof(data$Status)
 data <- within(data, rm(Country))
-data
+typeof(data)
 data <- one_hot(as.data.table(data), cols = "Status")
+typeof(data)
 colnames(data)[sapply(data, anyNA)]
 ```
 
@@ -57,23 +65,28 @@ You can also embed plots, for example:
 #summary(data$Country)
 #summary(data$Year)
 
-#table(is.na.data.frame(data))
+table(is.na(data))
 #There are 2563 null values in the data
 
-#table(is.na.data.frame(data$Life.expectancy))
+
+
 table(is.na.data.frame(data$Hepatitis.B))
+
+#table(is.na.data.frame(data$Life.expectancy))
 #table(is.na.data.frame(data$Polio))
+#table(is.na.data.frame(data$BMI))
+#table(is.na.data.frame(data$Diphtheria))
+#table(is.na.data.frame(data$thinness..1.19.years))
+#table(is.na.data.frame(data$thinness.5.9.years))
+
 table(is.na.data.frame(data$Total.expenditure))
 table(is.na.data.frame(data$Population))
 table(is.na.data.frame(data$Income.composition.of.resources))
 table(is.na.data.frame(data$Adult.Mortality))
-#table(is.na.data.frame(data$BMI))
-#table(is.na.data.frame(data$Diphtheria))
-#table(is.na.data.frame(data$thinness..1.19.years))
 table(is.na.data.frame(data$Schooling))
 table(is.na.data.frame(data$Alcohol))
 table(is.na.data.frame(data$GDP))
-#table(is.na.data.frame(data$thinness.5.9.years))
+
 ```
 
 
@@ -154,7 +167,6 @@ ind <- which(is.na(data$Life.expectancy))
 ##table(is.na.data.frame(data$GDP))
 #table(is.na.data.frame(data$thinness.5.9.years))
 
-
 data$Life.expectancy[is.na(data$Life.expectancy)] <- mean(data$Life.expectancy, na.rm = T)
 data$Polio[is.na(data$Polio)] <- mean(data$Polio, na.rm = T)
 data$BMI[is.na(data$BMI)] <- mean(data$BMI, na.rm = T)
@@ -168,6 +180,7 @@ data[ind]
 data <- within(data, rm(Hepatitis.B, Total.expenditure, Population, 
                         Income.composition.of.resources, Adult.Mortality,
                         Schooling, Alcohol, GDP))
+typeof(data)
 
 data.cor <- cor(data)
 
@@ -178,11 +191,11 @@ corrplot(data.cor, tl.cex = .75)
 #inds <- which(is.na(data$Population))
 
 #length(which(data$Country == "United States of America"))
-
 ```
 
-Features to use for fitting: 
+Features to use for fitting:
 Status_0, Status_1, percentage.expenditure, BMI, Polio, Diphtheria, HIV.AIDS
+
 
 ```{r}
 #length(data$Status_0)
@@ -195,18 +208,27 @@ Status_0, Status_1, percentage.expenditure, BMI, Polio, Diphtheria, HIV.AIDS
 #length(data$HIV.AIDS)
 #length(data$Year)
 
+bc <- boxCox(data$Life.expectancy~data$Status_0+data$percentage.expenditure+
+               data$BMI+data$Polio+data$Diphtheria+data$HIV.AIDS)
+
+lambdao <- bc$x[which.max(bc$y)]
+
 data <- as.data.frame(data)
 
-model1 <- lm(Life.expectancy ~ Status_0+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
+model1 <- lm(Life.expectancy ~ Status_0+percentage.expenditure+BMI+Polio+
+               Diphtheria+HIV.AIDS,data=data)
 
-model2 <- lm(Life.expectancy ~ Status_1+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
+summary(model1)
+
+Lmodel1 <- lm((Life.expectancy^lambdao-1)/lambdao ~ 
+                Status_0+percentage.expenditure+BMI+Polio+Diphtheria+HIV.AIDS, data = data)
+
+summary(Lmodel1)
 ```
 
 Looks like we can drop either Status_1 or Status_0 because they are EXACTLY inversely correlated. 
 
-
 ```{r}
-
 summary(model1)
 hist(studres(model1), 
      breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
@@ -216,12 +238,18 @@ hist(studres(model2),
      breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
 ```
 
+Below is the way I'd rather do it. I looked into it, 
+and it turns out that we CAN drop the na's and still have a whopping 1649 rows.
 
-Below is the way I'd rather do it. I looked into it, and it turns out that we CAN drop the na's and still have a whopping 1
+#My proposed model. 
+#####I like it better cause it works better and looks a tiny bit better.
 ```{r}
 data <- read.csv("Life Expectancy Data.csv")
-
+data <- as.data.table(data)
 #names(data)
+
+#data1 <- within(as.data.frame(data), rm())
+
 data1 <- data %>% filter(
   !is.na(data$Country),
   !is.na(data$Status),
@@ -246,11 +274,19 @@ data1 <- data %>% filter(
   !is.na(data$Schooling)
 )
 
-data1 <- within(data1, rm(Year, Country, Adult.Mortality, infant.deaths))
+data1$Status <- factor(x=data1$Status, levels=c("Developing", "Developed"), labels= c(0,1))
+data1 <- one_hot(as.data.table(data1), cols = "Status")
+data1$Status <- data1$Status_1
+#data$Status <- data1$Status
+#data1$Status <- replace(data1$Status, list=c("Developing", "Developed"), values = c(0,1))
 
-names(data1)
+#data1$Status
+#typeof(data1$Status)
+#data1
+#data1$Status <- as.integer(data1$Status)
+data1 <- within(data1, rm(Year, Country, Adult.Mortality, infant.deaths, Status_0, Status_1))
 
-data1$Status <- factor(x=data1$Status, levels=unique(data1$Status), labels=c(0,1))
+# The first model for variable selection
 
 model1 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
                Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
@@ -271,6 +307,8 @@ bc1 <- boxCox(data1$Life.expectancy ~ data1$Status+data1$Alcohol+
          data1$thinness..1.19.years+data1$thinness.5.9.years+
          data1$Income.composition.of.resources+data1$Schooling)
 
+# the second with the optimized variables selected 
+
 model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
                Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
                Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
@@ -284,17 +322,23 @@ bc2 <- boxCox(data1$Life.expectancy~data1$Status+data1$Alcohol+
          data1$BMI+data1$under.five.deaths+data1$Polio+data1$Total.expenditure+
          data1$Diphtheria+data1$HIV.AIDS+
          data1$Income.composition.of.resources+data1$Schooling)
+
+
 ```
+
 #Correlation Diagram
+
+```{r}
+#describe(data1)
+typeof(data1)
+data1.cor <- cor(data1)
+
+corrplot(data1.cor, tl.cex=.8)
+```
 
 #Residual Analysis
 
-
 ```{r}
-lambda1 <- bc1$x[which.max(bc1$y)]
-
-lambda2 <- bc2$x[which.max(bc2$y)]
-
 summary(residualPlot(model1, type="rstudent", quadratic=F, 
              col = "dodgerblue", pch=16, cex=1.5, 
              cex.axis=1.5, cex.lab=1.5, ylim=c(-3,3)))
@@ -305,9 +349,11 @@ qqPlot(model1)
 ```
 
 
-
 ```{r}
-influenceIndexPlot(model1, vars=c('Cook', 'hat'))
+influenceIndexPlot(model1, vars=c('Cook'), data1, main = "Cook Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('hat'), data1, main = "Hat Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('Studentized'), data1, main = "Studentized Diagnostic Plot")
+influencePlot(model1)
 dfbetaPlots(model1, intercept=T)
 ```
 
@@ -337,43 +383,128 @@ summary(residualPlot(model2, type="rstudent", quadratic=F,
              cex.axis=1.5, cex.lab=1.5, ylim=c(-3,3)))
 
 qqPlot(model2)
-residualPlot(model1, variable='fitted', type='rstudent')
+
+residualPlot(model2, variable='fitted', type='rstudent')
 ```
 
 
 ```{r}
-influenceIndexPlot(model2, vars=c('Cook', 'hat'))
+influenceIndexPlot(model2, vars=c('Cook'), data1, main = "Cook Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('hat'), data1, main = "Hat Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('Studentized'), data1, main = "Studentized Diagnostic Plot")
+influencePlot(model2)
+
 dfbetaPlots(model2, intercept=T)
 
 hist(studres(model2), 
      breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
 ```
 
-problem indexes are 903, 355, 1122
+problem indexes are 903, 355, 1122.
+We took out 903 and 1122, so now we only should remove 355
 
 ```{r}
-data1 <- data1[-c(355, 903),]
+data1 <- data1[-c(355),]
 data1
 
-model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
-               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+
                Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
 
 summary(model2)
-
 ```
 
 
 ```{r}
-influenceIndexPlot(model2, vars=c('Cook', 'hat'))
+influenceIndexPlot(model2, vars=c('Cook'), main = "Cook Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('hat'), main = "Hat Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('Studentized'), main = "Studentized Diagnostic Plot")
 dfbetaPlots(model2, intercept=T)
 
 hist(studres(model2), 
      breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
 
-vif(model2)
-```
-SO Far: this is where I am at. I like this version better. Sure: we cut out a LOT of NA values, but we can still get good data and even BETTER models than the last.
+residualPlot(model2, variable='fitted', type='rstudent')
 
-Note: we don't need transformations. Never needed transformations. BOTH models were regularly distributed.
+vif(model2)
+
+```
+
+So Far: this is where I am at. I like this version better. 
+Sure: we cut out a LOT of NA values, 
+but we can still get good data and even BETTER models than the last.
+
+Note: we don't need transformations. Never needed transformations. 
+BOTH models were regularly distributed. Whoops on my part lol.
+
+```{r}
+
+ggplotly(ggplot(data1, aes(x=Schooling, y=Life.expectancy)) + 
+           geom_point(alpha=.5, colour="blue") +
+           geom_smooth(method="lm") + theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust =1)) + 
+           theme(axis.title.y=element_text(angle=0,size = rel(1.25))))
+
+
+ggplotly(ggplot(data1, aes(x=Year, y=Life.expectancy)) + geom_point(alpha=.25) +
+  geom_count(aes(colour= ..n.., size=..n..)) + 
+  scale_color_viridis(option = "A") +
+  geom_smooth(method="lm") + 
+    theme(axis.title.x=element_text(angle=0,size = rel(1.5), 
+    margin = margin(1, unit = "cm"),vjust =1)) +
+    theme(axis.title.y=element_text(angle=0,size = rel(1.5))))
+```
+```{r}
+mean(data$Life.expectancy[which(data$Year == 2000)])
+mean(data$Life.expectancy[which(data$Year == 2015)])
+#data$Schooling[which.max(data$Schooling)]
+#data$Status
+
+ggplotly(ggplot(data1, aes(x=Schooling,y=Life.expectancy)) +
+           geom_count(aes(colour=..n..,size=..n..)) +
+           facet_wrap(data1$Status) + 
+           scale_color_viridis(option="D") +
+           geom_smooth(method="lm"))
+```
+
+
+```{r}
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           geom_point(alpha=.5, colour="blue") +
+           geom_count(aes(colour= ..n.., size=..n..)) +
+           scale_color_viridis(option="D") +
+           theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust = 1)) + 
+           theme(axis.title.y=element_text(angle=0,size = rel(1.25))))
+
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           theme(axis.title.x=element_text(angle=0,size = rel(1))) + 
+           theme(axis.title.y=element_text(angle=90, size = rel(1))) +
+           geom_boxplot() + 
+           facet_grid(rows = vars(data1$Status), cols=vars(data1$Year), scales = "free"))
+
+ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           theme(axis.title.x=element_text(angle=0,size = rel(1))) + 
+           theme(axis.title.y=element_text(angle=90, size = rel(1))) +
+           geom_boxplot() + 
+           facet_grid(rows = vars(data1$Status), cols=vars(data1$Year), scales = "free")
+
+
+#facet_grid(rows=vars(data1$Status), scales = "free")
+```
+
+```{r}
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           geom_boxplot() +
+           theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust = 1)) + 
+           theme(axis.title.y=element_text(angle=90,size = rel(1.25))) +
+           facet_wrap(data1$Status))
+```
+
+```{r}
+
+
+```
+
 
