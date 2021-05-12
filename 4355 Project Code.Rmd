@@ -1,0 +1,504 @@
+---
+title: "STAT 4355 Life Expectancy Project"
+author: "Muhammad Munir, Vismaya Joseph, Caleb Captain"
+date: "5/12/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading Required Libraries
+
+```{r}
+shhh <- suppressPackageStartupMessages
+shhh(library(ggplot2))
+shhh(library(plotly))
+shhh(library(tidyverse))
+shhh(library(stringr))
+shhh(library(mltools))
+shhh(library(data.table))
+shhh(library(car))
+shhh(library(dplyr))
+shhh(library(Hmisc))
+shhh(library(corrplot))
+shhh(library(MASS))
+shhh(library(faraway))
+shhh(library(viridis))
+shhh(library(stargazer))
+shhh(library(gtsummary))
+shhh(library(sensemakr))
+```
+
+# Data Exploration and Cleaning
+
+```{r}
+data <- read.csv("Life Expectancy Data.csv")
+describe(data)
+```
+
+These are the features of the data.
+Also, the number of unique entries for each feature.
+Some of these we will want to drop.
+Country is a good example: 
+we would not like the model to learn life expectancy from a country name.
+It needs to learn from the values, we can use the names to as an outlier check.
+
+```{r}
+colnames(data)
+unique(data$Status)
+unique(data$Country)
+
+Developed <- unique(data$Country[which(data$Status == "Developed")])
+Developing <- unique(data$Country[which(data$Status == "Developing")])
+```
+```{r}
+table(Developed)
+```
+
+```{r}
+table(Developing)
+```
+
+This section of code shows us which features/columns have null values.
+
+```{r}
+colnames(data)[sapply(data, anyNA)]
+table(is.na(data))
+```
+
+There are 2,563 null values in the data. 
+But they are confined to 1,293 rows of null values.
+
+```{r}
+table(is.na.data.frame(data$Hepatitis.B))
+table(is.na.data.frame(data$Life.expectancy))
+table(is.na.data.frame(data$Polio))
+table(is.na.data.frame(data$BMI))
+table(is.na.data.frame(data$Diphtheria))
+table(is.na.data.frame(data$thinness..1.19.years))
+table(is.na.data.frame(data$thinness.5.9.years))
+table(is.na.data.frame(data$Total.expenditure))
+table(is.na.data.frame(data$Population))
+table(is.na.data.frame(data$Income.composition.of.resources))
+table(is.na.data.frame(data$Adult.Mortality))
+table(is.na.data.frame(data$Schooling))
+table(is.na.data.frame(data$Alcohol))
+table(is.na.data.frame(data$GDP))
+```
+
+These are the features/columns with null values.
+
+```{r}
+colnames(data)[sapply(data, anyNA)]
+```
+
+```{r}
+summary(data$Life.expectancy)
+summary(data$Hepatitis.B)
+summary(data$Total.expenditure)
+summary(data$Population)
+summary(data$Income.composition.of.resources)
+summary(data$Adult.Mortality)
+summary(data$BMI)
+summary(data$Diphtheria)
+summary(data$thinness..1.19.years)
+summary(data$Schooling)
+summary(data$Alcohol)
+summary(data$Polio)
+summary(data$GDP)
+summary(data$thinness.5.9.years)
+```
+
+Boxplots and Histigrams of each of the null columns/features is shown below.
+
+```{r}
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Life.expectancy))) + 
+           labs(x="Life Expectancy"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Hepatitis.B))) + 
+           labs(x="Hepatitis B"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Total.expenditure))) + 
+           labs(x="Total Expenditure"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Population))) + 
+           labs(x="Population"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Income.composition.of.resources))) + 
+           labs(x="Income Composition of Resources"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Adult.Mortality))) + 
+           labs(x="Adult Mortality"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(BMI))) + 
+           labs(x="Body-Mass Index"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Diphtheria))) + 
+           labs(x="Diphtheria"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(thinness..1.19.years))) + 
+           labs(x="Thinness of 10-19 Years"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Schooling))) + 
+           labs(x="Schooling"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Alcohol))) + 
+           labs(x="Alcohol"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(Polio))) + 
+           labs(x="Polio"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(GDP))) + 
+           labs(x="Gross Domestic Product"))
+
+ggplotly(ggplot(data) + 
+           geom_histogram(stat="count", aes(x=is.na(thinness.5.9.years))) + 
+           labs(x="Thinness of 5-9 Years"))
+```
+
+Note that population is flat.
+Essentially the population is so sparse that it does not show a range of values.
+
+```{r}
+ggplotly(ggplot(data, aes(y=Life.expectancy)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Hepatitis.B)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Total.expenditure)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Population)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Income.composition.of.resources)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Adult.Mortality)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=BMI)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Diphtheria)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=thinness..1.19.years)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Schooling)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Alcohol)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=Polio)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=GDP)) + geom_boxplot())
+ggplotly(ggplot(data, aes(y=thinness.5.9.years)) + geom_boxplot())
+```
+
+
+```{r}
+data <- as.data.table(data)
+
+data1 <- data %>% filter(
+  !is.na(data$Country),
+  !is.na(data$Status),
+  !is.na(data$Adult.Mortality),
+  !is.na(data$Life.expectancy),
+  !is.na(data$infant.deaths),
+  !is.na(data$Alcohol),
+  !is.na(data$percentage.expenditure),
+  !is.na(data$Hepatitis.B),
+  !is.na(data$Measles),
+  !is.na(data$BMI),
+  !is.na(data$under.five.deaths),
+  !is.na(data$Polio),
+  !is.na(data$Total.expenditure),
+  !is.na(data$Diphtheria),
+  !is.na(data$HIV.AIDS),
+  !is.na(data$GDP),
+  !is.na(data$Population),
+  !is.na(data$thinness..1.19.years),
+  !is.na(data$thinness.5.9.years),
+  !is.na(data$Income.composition.of.resources),
+  !is.na(data$Schooling)
+)
+
+data1$Status <- factor(x=data1$Status, levels=c("Developing", "Developed"), labels= c(0,1))
+data1 <- one_hot(as.data.table(data1), cols = "Status")
+data1$Status <- data1$Status_1
+```
+
+# Graphing
+
+These graphs show the relations between Life Expectancy and various features of interest.
+
+```{r}
+ggplotly(ggplot(data1, aes(x=Alcohol, y=Life.expectancy)) +
+           geom_point() +
+           geom_count(aes(colour= ..n.., size=..n..)) +
+           scale_color_viridis(option = "C") +
+           theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust = 1)) + 
+           theme(axis.title.y=element_text(angle=90,size = rel(1.25))) +
+           geom_smooth(method="lm") +
+           labs(x="Alcohol Intake"))
+
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           geom_point(alpha=.5, colour="blue") +
+           geom_count(aes(colour= ..n.., size=..n..)) +
+           scale_color_viridis(option="D") +
+           theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust = 1)) + 
+           theme(axis.title.y=element_text(angle=0,size = rel(1.25))) + 
+           labs(x="Development Status"))
+
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           geom_boxplot() +
+           theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust = 1)) + 
+           theme(axis.title.y=element_text(angle=90,size = rel(1.25))) +
+           facet_wrap(data1$Status) +
+           labs(x="Development Status"))
+```
+
+
+```{r}
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           theme(axis.title.x=element_text(angle=0,size = rel(1))) + 
+           theme(axis.title.y=element_text(angle=90, size = rel(1))) +
+           geom_boxplot() + 
+           facet_grid(rows = vars(data1$Status), cols=vars(data1$Year), scales = "free"))
+
+ggplotly(ggplot(data1, aes(x=Schooling, y=Life.expectancy)) + 
+           geom_point(alpha=.5, colour="blue") +
+           geom_smooth(method="lm") + theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust =1)) + 
+           theme(axis.title.y=element_text(angle=0,size = rel(1.25))))
+```
+
+
+```{r}
+mean(data1$Life.expectancy[which(data1$Year == 2000)])
+mean(data1$Life.expectancy[which(data1$Year == 2015)])
+```
+
+
+```{r}
+ggplotly(ggplot(data1, aes(x=Year, y=Life.expectancy)) + geom_point(alpha=.25) +
+  geom_count(aes(colour= ..n.., size=..n..)) + 
+  scale_color_viridis(option = "A") +
+  geom_smooth(method="lm") + 
+    theme(axis.title.x=element_text(angle=0,size = rel(1.5), 
+    margin = margin(1, unit = "cm"),vjust =1)) +
+    theme(axis.title.y=element_text(angle=0,size = rel(1.5))))
+```
+
+
+```{r}
+ggplotly(ggplot(data1, aes(x= Income.composition.of.resources,y= Life.expectancy)) + 
+  geom_point() +
+  geom_count(aes(colour= ..n.., size=..n..)) +
+  scale_color_viridis(option = "C") +
+  geom_smooth(method="lm"))
+
+ggplotly(ggplot(data1, aes(x= GDP,y= Life.expectancy)) + 
+  geom_point())
+
+ggplotly(ggplot(data1, aes(x= Total.expenditure,y= Life.expectancy)) + 
+  geom_point())
+```
+
+
+```{r}
+ggplotly(ggplot(data1, aes(x=Schooling,y=Life.expectancy)) +
+           geom_count(aes(colour=..n..,size=..n..)) +
+           facet_wrap(data1$Status) + 
+           scale_color_viridis(option="D") +
+           geom_smooth(method="lm"))
+
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           geom_point(alpha=.5, colour="blue") +
+           geom_count(aes(colour= ..n.., size=..n..)) +
+           scale_color_viridis(option="D") +
+           theme(axis.title.x=element_text(angle=0,size = rel(1.25), 
+           margin = margin(1, unit = "cm"),vjust = 1)) + 
+           theme(axis.title.y=element_text(angle=0,size = rel(1.25))))
+
+ggplotly(ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           theme(axis.title.x=element_text(angle=0,size = rel(1))) + 
+           theme(axis.title.y=element_text(angle=90, size = rel(1))) +
+           geom_boxplot() + 
+           facet_grid(rows = vars(data1$Status), cols=vars(data1$Year), scales = "free"))
+
+ggplot(data1, aes(x=Status, y=Life.expectancy)) + 
+           theme(axis.title.x=element_text(angle=0,size = rel(1))) + 
+           theme(axis.title.y=element_text(angle=90, size = rel(1))) +
+           geom_boxplot() + 
+           facet_grid(rows = vars(data1$Status), cols=vars(data1$Year), scales = "free")
+```
+
+# Model Fitting
+
+The first model for variable selection
+
+```{r}
+data1 <- within(data1, rm(Year, Country, Adult.Mortality, infant.deaths, Status_0, Status_1))
+
+model1 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+GDP+Population+thinness..1.19.years+ 
+               thinness.5.9.years+Income.composition.of.resources+Schooling, data1)
+
+summary(model1)
+
+hist(studres(model1), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+vif(model1)
+
+bc1 <- boxCox(data1$Life.expectancy ~ data1$Status+data1$Alcohol+
+         data1$percentage.expenditure+data1$Hepatitis.B+data1$Measles+
+         data1$BMI+data1$under.five.deaths+data1$Polio+data1$Total.expenditure+
+         data1$Diphtheria+data1$HIV.AIDS+data1$GDP+data1$Population+
+         data1$thinness..1.19.years+data1$thinness.5.9.years+
+         data1$Income.composition.of.resources+data1$Schooling)
+```
+
+Notice the histogram: It is an obvious normal distribution, so we won't need
+transformations.
+
+The second model is one with the optimized variables selected
+
+```{r}
+model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
+
+summary(model2)
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+bc2 <- boxCox(data1$Life.expectancy~data1$Status+data1$Alcohol+
+         data1$percentage.expenditure+data1$Hepatitis.B+data1$Measles+
+         data1$BMI+data1$under.five.deaths+data1$Polio+data1$Total.expenditure+
+         data1$Diphtheria+data1$HIV.AIDS+
+         data1$Income.composition.of.resources+data1$Schooling)
+```
+
+Another normal distribution. No transformation needed.
+
+#Correlation Diagram
+
+```{r}
+typeof(data1)
+data1.cor <- cor(data1)
+
+corrplot(data1.cor, tl.cex=.8)
+```
+
+#Residual Analysis
+
+```{r}
+summary(residualPlot(model1, type="rstudent", quadratic=F, 
+             col = "dodgerblue", pch=16, cex=1.5, 
+             cex.axis=1.5, cex.lab=1.5, ylim=c(-3,3)))
+
+residualPlot(model1, variable='fitted', type='rstudent')
+
+qqPlot(model1)
+```
+
+
+```{r}
+influenceIndexPlot(model1, vars=c('Cook'), data1, main = "Cook Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('hat'), data1, main = "Hat Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('Studentized'), data1, main = "Studentized Diagnostic Plot")
+influencePlot(model1)
+dfbetaPlots(model1, intercept=T)
+
+influenceIndexPlot(model1, vars=c('Cook'), data1, main = "Cook Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('hat'), data1, main = "Hat Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('Studentized'), data1, main = "Studentized Diagnostic Plot")
+influencePlot(model1)
+dfbetaPlots(model1, intercept=T)
+
+```
+
+From the future: Outliers/Problem indexes are 903, 1122, 665, 672, 1344, 1339.
+
+```{r}
+data1[c(903,1122,665,672,1344,1339,355),]
+```
+
+Lets Take them out and try it again.
+
+```{r}
+data1 <- data1[-c(903,1122,665,672,1344,1339),]
+data1
+
+model1 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+GDP+Population+thinness..1.19.years+ 
+               thinness.5.9.years+Income.composition.of.resources+Schooling, data1)
+
+summary(model1)
+
+hist(studres(model1), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+qqPlot(model1)
+```
+
+```{r}
+influenceIndexPlot(model1, vars=c('Cook'), data1, main = "Cook Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('hat'), data1, main = "Hat Diagnostic Plot")
+influenceIndexPlot(model1, vars=c('Studentized'), data1, main = "Studentized Diagnostic Plot")
+influencePlot(model1)
+dfbetaPlots(model1, intercept=T)
+```
+
+```{r}
+summary(residualPlot(model2, type="rstudent", quadratic=F, 
+             col = "dodgerblue", pch=16, cex=1.5, 
+             cex.axis=1.5, cex.lab=1.5, ylim=c(-3,3)))
+
+qqPlot(model2)
+
+residualPlot(model2, variable='fitted', type='rstudent')
+```
+
+```{r}
+influenceIndexPlot(model2, vars=c('Cook'), data1, main = "Cook Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('hat'), data1, main = "Hat Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('Studentized'), data1, main = "Studentized Diagnostic Plot")
+influencePlot(model2)
+
+dfbetaPlots(model2, intercept=T)
+
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+```
+
+Problem indices: 903, 355, 1122, 1344, 1339.
+We took out 903, 1122, 1344, and 1339, so now we only should remove 355
+
+```{r}
+data1 <- data1[-c(355),]
+data1
+
+model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+
+               Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
+
+summary(model2)
+```
+
+```{r}
+influenceIndexPlot(model2, vars=c('Cook'), main = "Cook Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('hat'), main = "Hat Diagnostic Plot")
+influenceIndexPlot(model2, vars=c('Studentized'), main = "Studentized Diagnostic Plot")
+dfbetaPlots(model2, intercept=T)
+
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+residualPlot(model2, variable='fitted', type='rstudent')
+
+vif(model2)
+```
