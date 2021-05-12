@@ -171,7 +171,7 @@ influenceIndexPlot (transformed_fit)
 Multicolinearity
 
 ```{r}
-vif (transformed_fit)
+vif (fit)
 ```
 
 

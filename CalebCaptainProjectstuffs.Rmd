@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(rmarkdown)
 ```
 
 ## R Markdown
@@ -21,6 +22,7 @@ When you click the **Knit** button a document will be generated that includes bo
 #install.packages('dplyr')
 #install.packages('corrplot')
 #install.packages("virirdis")
+render("CalebCaptainProjectstuffs.Rmd", "pdf_document")
 
 shhh <- suppressPackageStartupMessages
 shhh(library(ggplot2))
@@ -226,17 +228,7 @@ Lmodel1 <- lm((Life.expectancy^lambdao-1)/lambdao ~
 summary(Lmodel1)
 ```
 
-Looks like we can drop either Status_1 or Status_0 because they are EXACTLY inversely correlated. 
 
-```{r}
-summary(model1)
-hist(studres(model1), 
-     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
-
-summary(model2)
-hist(studres(model2), 
-     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
-```
 
 Below is the way I'd rather do it. I looked into it, 
 and it turns out that we CAN drop the na's and still have a whopping 1649 rows.
@@ -312,10 +304,10 @@ bc1 <- boxCox(data1$Life.expectancy ~ data1$Status+data1$Alcohol+
 model2 <- lm(Life.expectancy ~ Status+Alcohol+percentage.expenditure+ 
                Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
                Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
-
 summary(model2)
 hist(studres(model2), 
      breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+vif (model2)
 
 bc2 <- boxCox(data1$Life.expectancy~data1$Status+data1$Alcohol+
          data1$percentage.expenditure+data1$Hepatitis.B+data1$Measles+
@@ -323,7 +315,34 @@ bc2 <- boxCox(data1$Life.expectancy~data1$Status+data1$Alcohol+
          data1$Diphtheria+data1$HIV.AIDS+
          data1$Income.composition.of.resources+data1$Schooling)
 
+model3 <- lm(Life.expectancy^2 ~ Status+Alcohol+percentage.expenditure+ 
+               Hepatitis.B+Measles+BMI+under.five.deaths+Polio+Total.expenditure+ 
+               Diphtheria+HIV.AIDS+Income.composition.of.resources+Schooling, data1)
 
+summary(model3)
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+vif (model2)
+
+bc3 <- boxCox(data1$Life.expectancy^2~data1$Status+data1$Alcohol+
+         data1$percentage.expenditure+data1$Hepatitis.B+data1$Measles+
+         data1$BMI+data1$under.five.deaths+data1$Polio+data1$Total.expenditure+
+         data1$Diphtheria+data1$HIV.AIDS+
+         data1$Income.composition.of.resources+data1$Schooling)
+
+
+```
+
+Looks like we can drop either Status_1 or Status_0 because they are EXACTLY inversely correlated. 
+
+```{r}
+summary(model1)
+hist(studres(model1), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
+
+
+hist(studres(model2), 
+     breaks=10, freq=F, col="cornflowerblue", cex.axis=1.5, cex.lab=1.5, cex.main=2)
 ```
 
 #Correlation Diagram
