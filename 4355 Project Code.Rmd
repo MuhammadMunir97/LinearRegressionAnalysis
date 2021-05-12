@@ -38,6 +38,71 @@ data <- read.csv("Life Expectancy Data.csv")
 describe(data)
 ```
 
+Plots Used In Report
+
+```{r}
+ggplot(data) + geom_hex(aes(Year, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+
+ggplot(data) + geom_hex(aes(Status, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Alcohol, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(percentage.expenditure, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Hepatitis.B, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Measles, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(BMI, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(under.five.deaths, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Polio, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Total.expenditure, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Diphtheria, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(HIV.AIDS, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(GDP, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Population, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(thinness..1.19.years, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(thinness.5.9.years, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Income.composition.of.resources, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+
+ggplot(data) + geom_hex(aes(Schooling, Life.expectancy), bins = 100) +
+         scale_fill_gradientn("", colours = rev(rainbow(10, end = 4/6)))
+```
+
+# Histograms
+```{r}
+hist (data$Life.expectancy, xlab="Life Expectancy", ylab="Frequency of Life Expectancy",
+      border="green",col="blue", main = "Life Expectancy")
+```
+
 These are the features of the data.
 Also, the number of unique entries for each feature.
 Some of these we will want to drop.
@@ -53,6 +118,7 @@ unique(data$Country)
 Developed <- unique(data$Country[which(data$Status == "Developed")])
 Developing <- unique(data$Country[which(data$Status == "Developing")])
 ```
+
 ```{r}
 table(Developed)
 ```
